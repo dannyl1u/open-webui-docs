@@ -95,6 +95,20 @@ is also being used and set to `True`. Failure to do so will result in the inabil
 - Description: Sets the default role assigned to new users.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
+#### `PENDING_USER_OVERLAY_TITLE`
+
+- Type: `str`
+- Default: Empty string (' ')
+- Description: Sets a custom title for the pending user overlay.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `PENDING_USER_OVERLAY_CONTENT`
+
+- Type: `str`
+- Default: Empty string (' ')
+- Description: Sets a custom text content for the pending user overlay.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
 #### `ENABLE_CHANNELS`
 
 - Type: `bool`
@@ -127,11 +141,18 @@ is also being used and set to `True`. Failure to do so will result in the inabil
 - Description: Enables or disables user webhooks.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
+#### `RESPONSE_WATERMARK`
+
+- Type: `str`
+- Default: Empty string (' ')
+- Description: Sets a custom text that will be included when you copy a message in the chat. E.g. `"This text is AI generated"` -> will add "This text is AI generated" to every message, when copied.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
 #### `THREAD_POOL_SIZE`
 
 - Type: `int`
 - Default: `0`
-- Description: Sets the thread pool size for FastAPI/AnyIO blocking calls. By default FastAPI/AnyIO use `40` threads.
+- Description: Sets the thread pool size for FastAPI/AnyIO blocking calls. By default (when set to 0) FastAPI/AnyIO use `40` threads. In case of large instances and many concurrent users, it may be needed to increase `THREAD_POOL_SIZE` to prevent blocking.
 
 #### `SHOW_ADMIN_DETAILS`
 
@@ -1066,6 +1087,43 @@ modeling files for reranking.
 - Default: `None`
 - Description: Specifies an optional connection token for Milvus.
 
+#### `MILVUS_INDEX_TYPE`
+
+- Type: `str`
+- Default: `HNSW`
+- Options: `AUTOINDEX`, `FLAT`, `IVF_FLAT`, `HNSW`
+- Description: Specifies the index type to use when creating a new collection in Milvus. `AUTOINDEX` is generally recommended for Milvus standalone. `HNSW` may offer better performance but typically requires a clustered Milvus setup.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `MILVUS_METRIC_TYPE`
+
+- Type: `str`
+- Default: `COSINE`
+- Options: `COSINE`, `IP`, `L2`
+- Description: Specifies the metric type for vector similarity search in Milvus.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `MILVUS_HNSW_M`
+
+- Type: `int`
+- Default: `16`
+- Description: Specifies the `M` parameter for the HNSW index type in Milvus. This influences the number of bi-directional links created for each new element during construction. Only applicable if `MILVUS_INDEX_TYPE` is `HNSW`.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `MILVUS_HNSW_EFCONSTRUCTION`
+
+- Type: `int`
+- Default: `100`
+- Description: Specifies the `efConstruction` parameter for the HNSW index type in Milvus. This influences the size of the dynamic list for the nearest neighbors during index construction. Only applicable if `MILVUS_INDEX_TYPE` is `HNSW`.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `MILVUS_IVF_FLAT_NLIST`
+
+- Type: `int`
+- Default: `128`
+- Description: Specifies the `nlist` parameter for the IVF_FLAT index type in Milvus. This is the number of cluster units. Only applicable if `MILVUS_INDEX_TYPE` is `IVF_FLAT`.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
 ### OpenSearch
 
 #### `OPENSEARCH_CERT_VERIFY`
@@ -1077,6 +1135,7 @@ modeling files for reranking.
 #### `OPENSEARCH_PASSWORD`
 
 - Type: `str`
+- Default: `None`
 - Description: Sets the password for OpenSearch.
 
 #### `OPENSEARCH_SSL`
@@ -1094,6 +1153,7 @@ modeling files for reranking.
 #### `OPENSEARCH_USERNAME`
 
 - Type: `str`
+- Default: `None`
 - Description: Sets the username for OpenSearch.
 
 ### PGVector
@@ -1139,6 +1199,20 @@ modeling files for reranking.
 - Type: `int`
 - Default: `6334`
 - Description: Sets the gRPC port number for Qdrant.
+
+#### `ENABLE_QDRANT_MULTITENANCY_MODE`
+
+- Type: `bool`
+- Default: `False`
+- Description: Enables multitenancy pattern for Qdrant collections management, which significantly reduces RAM usage and computational overhead by consolidating similar vector data structures. Recommend turn on
+
+:::info
+
+This will disconect all Qdrant collections created in the previous pattern, which is non-multitenancy. Go to  `Admin Settings` > `Documents` > `Reindex Knowledge Base` to migrate existing knowledges.
+
+The Qdrant collections created in the previous pattern will still take resources. Therefore, when you decided to use multitenancy pattern as your default, go to `Admin Settings` > `Documents` to reset Qdrant, which will delete all collections with `open_webui` prefix and then do the Reindex Knowledge Base.
+
+:::
 
 ### Pinecone
 
@@ -1864,7 +1938,8 @@ Using a remote Playwright browser via `PLAYWRIGHT_WS_URL` can be beneficial for:
 
 - Type: `str`
 - Default: `en`
-- Description: Sets the language to use for YouTube video loading.
+- Description: Comma-separated list of language codes to try when fetching YouTube video transcriptions, in priority order.
+- Example: If set to `es,de`, Spanish transcriptions will be attempted first, then German if Spanish was not available, and lastly English. Note: If none of the specified languages are available and `en` was not in your list, the system will automatically try English as a final fallback.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 ## Audio
@@ -2353,6 +2428,13 @@ address. This is considered unsafe as not all OAuth providers will verify email 
 potential account takeovers.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
+#### `OAUTH_UPDATE_PICTURE_ON_LOGIN`
+
+- Type: `bool`
+- Default: `False`
+- Description: If enabled, updates the local user profile picture with the OAuth-provided picture on login.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
 #### `WEBUI_AUTH_TRUSTED_EMAIL_HEADER`
 
 - Type: `str`
@@ -2664,6 +2746,12 @@ See https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-o
 - Description: Sets the path to the LDAP CA certificate file.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
+#### `LDAP_VALIDATE_CERT`
+
+- Type: `bool`
+- Description: Sets whether to validate the LDAP CA certificate.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
 #### `LDAP_CIPHERS`
 
 - Type: `str`
@@ -2893,6 +2981,12 @@ These variables are not specific to Open WebUI but can still be valuable in cert
 - Default: `False`
 - Description: Specifies whether to use the accelerated endpoint for S3 storage.
 
+#### `S3_ENABLE_TAGGING`
+
+- Type: `str`
+- Default: `False`
+- Description: Enables S3 object tagging after uploads for better organization, searching, and integration with file management policies. Always set to `False` when using Cloudflare R2, as R2 does not support object tagging.
+- 
 #### Google Cloud Storage
 
 #### `GOOGLE_APPLICATION_CREDENTIALS_JSON`
@@ -3016,8 +3110,8 @@ When deploying Open-WebUI in a multi-node/worker cluster, you must ensure that t
 #### `ENABLE_WEBSOCKET_SUPPORT`
 
 - Type: `bool`
-- Default: `False`
-- Description: Enables websocket support in Open WebUI (used with Redis).
+- Default: `True`
+- Description: Enables websocket support in Open WebUI.
 
 :::info
 
