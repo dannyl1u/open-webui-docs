@@ -13,7 +13,7 @@ As new variables are introduced, this page will be updated to reflect the growin
 
 :::info
 
-This page is up-to-date with Open WebUI release version [v0.6.5](https://github.com/open-webui/open-webui/releases/tag/v0.6.5), but is still a work in progress to later include more accurate descriptions, listing out options available for environment variables, defaults, and improving descriptions.
+This page is up-to-date with Open WebUI release version [v0.6.9](https://github.com/open-webui/open-webui/releases/tag/v0.6.9), but is still a work in progress to later include more accurate descriptions, listing out options available for environment variables, defaults, and improving descriptions.
 
 :::
 
@@ -95,6 +95,20 @@ is also being used and set to `True`. Failure to do so will result in the inabil
 - Description: Sets the default role assigned to new users.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
+#### `PENDING_USER_OVERLAY_TITLE`
+
+- Type: `str`
+- Default: Empty string (' ')
+- Description: Sets a custom title for the pending user overlay.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `PENDING_USER_OVERLAY_CONTENT`
+
+- Type: `str`
+- Default: Empty string (' ')
+- Description: Sets a custom text content for the pending user overlay.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
 #### `ENABLE_CHANNELS`
 
 - Type: `bool`
@@ -127,11 +141,18 @@ is also being used and set to `True`. Failure to do so will result in the inabil
 - Description: Enables or disables user webhooks.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
+#### `RESPONSE_WATERMARK`
+
+- Type: `str`
+- Default: Empty string (' ')
+- Description: Sets a custom text that will be included when you copy a message in the chat. E.g. `"This text is AI generated"` -> will add "This text is AI generated" to every message, when copied.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
 #### `THREAD_POOL_SIZE`
 
 - Type: `int`
 - Default: `0`
-- Description: Sets the thread pool size for FastAPI/AnyIO blocking calls. By default FastAPI/AnyIO use `40` threads.
+- Description: Sets the thread pool size for FastAPI/AnyIO blocking calls. By default (when set to 0) FastAPI/AnyIO use `40` threads. In case of large instances and many concurrent users, it may be needed to increase `THREAD_POOL_SIZE` to prevent blocking.
 
 #### `SHOW_ADMIN_DETAILS`
 
@@ -215,7 +236,7 @@ This will run the Open WebUI on port `9999`. The `PORT` environment variable is 
 - Description: List of banners to show to users. The format for banners are:
 
 ```json
-[{"id": "string","type": "string [info, success, warning, error]","title": "string","content": "string","dismissible": False,"timestamp": 1000}]
+[{"id": "string", "type": "string [info, success, warning, error]", "title": "string", "content": "string", "dismissible": false, "timestamp": 1000}]
 ```
 
 - Persistence: This environment variable is a `PersistentConfig` variable.
@@ -234,8 +255,7 @@ WEBUI_BANNERS="[{\"id\": \"1\", \"type\": \"warning\", \"title\": \"Your message
 
 - Type: `bool`
 - Default: `False`
-- Description: Builds the Docker image with NVIDIA CUDA support. Enables GPU acceleration
-for local Whisper and embeddings.
+- Description: Builds the Docker image with NVIDIA CUDA support. Enables GPU acceleration for local Whisper and embeddings.
 
 #### `EXTERNAL_PWA_MANIFEST_URL`
 
@@ -1066,6 +1086,43 @@ modeling files for reranking.
 - Default: `None`
 - Description: Specifies an optional connection token for Milvus.
 
+#### `MILVUS_INDEX_TYPE`
+
+- Type: `str`
+- Default: `HNSW`
+- Options: `AUTOINDEX`, `FLAT`, `IVF_FLAT`, `HNSW`
+- Description: Specifies the index type to use when creating a new collection in Milvus. `AUTOINDEX` is generally recommended for Milvus standalone. `HNSW` may offer better performance but typically requires a clustered Milvus setup.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `MILVUS_METRIC_TYPE`
+
+- Type: `str`
+- Default: `COSINE`
+- Options: `COSINE`, `IP`, `L2`
+- Description: Specifies the metric type for vector similarity search in Milvus.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `MILVUS_HNSW_M`
+
+- Type: `int`
+- Default: `16`
+- Description: Specifies the `M` parameter for the HNSW index type in Milvus. This influences the number of bi-directional links created for each new element during construction. Only applicable if `MILVUS_INDEX_TYPE` is `HNSW`.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `MILVUS_HNSW_EFCONSTRUCTION`
+
+- Type: `int`
+- Default: `100`
+- Description: Specifies the `efConstruction` parameter for the HNSW index type in Milvus. This influences the size of the dynamic list for the nearest neighbors during index construction. Only applicable if `MILVUS_INDEX_TYPE` is `HNSW`.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `MILVUS_IVF_FLAT_NLIST`
+
+- Type: `int`
+- Default: `128`
+- Description: Specifies the `nlist` parameter for the IVF_FLAT index type in Milvus. This is the number of cluster units. Only applicable if `MILVUS_INDEX_TYPE` is `IVF_FLAT`.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
 ### OpenSearch
 
 #### `OPENSEARCH_CERT_VERIFY`
@@ -1077,6 +1134,7 @@ modeling files for reranking.
 #### `OPENSEARCH_PASSWORD`
 
 - Type: `str`
+- Default: `None`
 - Description: Sets the password for OpenSearch.
 
 #### `OPENSEARCH_SSL`
@@ -1094,6 +1152,7 @@ modeling files for reranking.
 #### `OPENSEARCH_USERNAME`
 
 - Type: `str`
+- Default: `None`
 - Description: Sets the username for OpenSearch.
 
 ### PGVector
@@ -1139,6 +1198,32 @@ modeling files for reranking.
 - Type: `int`
 - Default: `6334`
 - Description: Sets the gRPC port number for Qdrant.
+
+#### `ENABLE_QDRANT_MULTITENANCY_MODE`
+
+- Type: `bool`
+- Default: `False`
+- Description: Enables multitenancy pattern for Qdrant collections management, which significantly reduces RAM usage and computational overhead by consolidating similar vector data structures. Recommend turn on
+
+:::info
+
+This will disconect all Qdrant collections created in the previous pattern, which is non-multitenancy. Go to  `Admin Settings` > `Documents` > `Reindex Knowledge Base` to migrate existing knowledges.
+
+The Qdrant collections created in the previous pattern will still consume resources.
+
+Currently, there is no button in the UI to only reset the vector DB. If you want to migrate knowledge to multitenancy:
+- Remove all collections with the `open_webui-knowledge` prefix (or `open_webui` prefix to remove all collections related to Open WebUI) using the native Qdrant client
+- Go to `Admin Settings` > `Documents` > `Reindex Knowledge Base` to migrate existing knowledge base
+
+`Reindex Knowledge Base` will ONLY migrate the knowledge base
+
+:::
+
+:::danger
+
+If you decide to use the multitenancy pattern as your default and you don't need to migrate old knowledge, go to `Admin Settings` > `Documents` to reset vector and knowledge, which will delete all collections with the `open_webui` prefix and all stored knowledge.
+
+:::
 
 ### Pinecone
 
@@ -1189,6 +1274,7 @@ When using Pinecone as the vector store, the following environment variables are
 - Type: `str`
 - Options:
   - Leave empty to use default
+  - `external` - Use external loader
   - `tika` - Use a local Apache Tika server
   - `docling` - Use Docling engine
   - `document_intelligence` - Use Document Intelligence engine
@@ -1201,6 +1287,20 @@ When using Pinecone as the vector store, the following environment variables are
 - Type: `str`
 - Default: `None`
 - Description: Specifies the Mistral OCR API key to use.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `EXTERNAL_DOCUMENT_LOADER_URL`
+
+- Type: `str`
+- Default: `None`
+- Description: Sets the URL for the external document loader service.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `EXTERNAL_DOCUMENT_LOADER_API_KEY`
+
+- Type: `str`
+- Default: `None`
+- Description: Sets the API key for authenticating with the external document loader service.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `TIKA_SERVER_URL`
@@ -1279,6 +1379,13 @@ When using Pinecone as the vector store, the following environment variables are
 - Type: `float`
 - Default: `0.0`
 - Description: Sets the relevance threshold to consider for documents when used with reranking.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `RAG_HYBRID_BM25_WEIGHT`
+
+- Type: `float`
+- Default: `0.5`
+- Description: Sets the weight given to the keyword search (BM25) during hybrid search. 1 means only keyword serach, 0 means only vector search.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `RAG_TEMPLATE`
@@ -1383,6 +1490,18 @@ Provide a clear and direct response to the user's query, including inline citati
 When configuring `RAG_FILE_MAX_SIZE` and `RAG_FILE_MAX_COUNT`, ensure that the values are reasonable to prevent excessive file uploads and potential performance issues.
 
 :::
+
+#### `RAG_ALLOWED_FILE_EXTENSIONS`
+
+- Type: `list` of `str`
+- Default: `[]` (which means all supported file types are allowed)
+- Description: Specifies which file extensions are permitted for upload. 
+
+```json
+["pdf,docx,txt"]
+```
+
+- Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `RAG_RERANKING_MODEL`
 
@@ -1501,21 +1620,21 @@ Strictly return in JSON format:
 
 #### `RAG_EMBEDDING_CONTENT_PREFIX`
 
-- Type: 
+- Type: `str`
 - Default: `None`
 - Description: Specifies the prefix for the RAG embedding content.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `RAG_EMBEDDING_PREFIX_FIELD_NAME`
 
-- Type: 
+- Type: `str`
 - Default: `None`
 - Description: Specifies the field name for the RAG embedding prefix.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `RAG_EMBEDDING_QUERY_PREFIX`
 
-- Type: 
+- Type: `str`
 - Default: `None`
 - Description: Specifies the prefix for the RAG embedding query.
 - Persistence: This environment variable is a `PersistentConfig` variable.
@@ -1576,7 +1695,7 @@ When enabling `GOOGLE_DRIVE_INTEGRATION`, ensure that you have configured `GOOGL
 
 - Type: `bool`
 - Default: `False`
-- Description: Enable web search toggle
+- Description: Enable web search toggle.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `ENABLE_SEARCH_QUERY_GENERATION`
@@ -1794,7 +1913,7 @@ the search query. Example: `http://searxng.local/search?q=<query>`
 - Default: `safe_web`
 - Description: Specifies the loader to use for retrieving and processing web content.
 - Options:
-  - '' - Uses the `requests` module with enhanced error handling.
+  - `requests` - Uses the Requests module with enhanced error handling.
   - `playwright` - Uses Playwright for more advanced web page rendering and interaction.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
@@ -1864,7 +1983,8 @@ Using a remote Playwright browser via `PLAYWRIGHT_WS_URL` can be beneficial for:
 
 - Type: `str`
 - Default: `en`
-- Description: Sets the language to use for YouTube video loading.
+- Description: Comma-separated list of language codes to try when fetching YouTube video transcriptions, in priority order.
+- Example: If set to `es,de`, Spanish transcriptions will be attempted first, then German if Spanish was not available, and lastly English. Note: If none of the specified languages are available and `en` was not in your list, the system will automatically try English as a final fallback.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 ## Audio
@@ -2349,8 +2469,14 @@ Strictly return in JSON format:
 - Type: `bool`
 - Default: `False`
 - Description: If enabled, merges OAuth accounts with existing accounts using the same email
-address. This is considered unsafe as not all OAuth providers will verify email addresses and can lead to
-potential account takeovers.
+address. This is considered unsafe as not all OAuth providers will verify email addresses and can lead to potential account takeovers.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
+#### `OAUTH_UPDATE_PICTURE_ON_LOGIN`
+
+- Type: `bool`
+- Default: `False`
+- Description: If enabled, updates the local user profile picture with the OAuth-provided picture on login.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `WEBUI_AUTH_TRUSTED_EMAIL_HEADER`
@@ -2371,13 +2497,13 @@ See https://support.google.com/cloud/answer/6158849?hl=en
 #### `GOOGLE_CLIENT_ID`
 
 - Type: `str`
-- Description: Sets the client ID for Google OAuth
+- Description: Sets the client ID for Google OAuth.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `GOOGLE_CLIENT_SECRET`
 
 - Type: `str`
-- Description: Sets the client secret for Google OAuth
+- Description: Sets the client secret for Google OAuth.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `GOOGLE_OAUTH_SCOPE`
@@ -2391,7 +2517,7 @@ See https://support.google.com/cloud/answer/6158849?hl=en
 
 - Type: `str`
 - Default: `<backend>/oauth/google/callback`
-- Description: Sets the redirect URI for Google OAuth
+- Description: Sets the redirect URI for Google OAuth.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 ### Microsoft
@@ -2401,19 +2527,19 @@ See https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-registe
 #### `MICROSOFT_CLIENT_ID`
 
 - Type: `str`
-- Description: Sets the client ID for Microsoft OAuth
+- Description: Sets the client ID for Microsoft OAuth.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `MICROSOFT_CLIENT_SECRET`
 
 - Type: `str`
-- Description: Sets the client secret for Microsoft OAuth
+- Description: Sets the client secret for Microsoft OAuth.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `MICROSOFT_CLIENT_TENANT_ID`
 
 - Type: `str`
-- Description: Sets the tenant ID for Microsoft OAuth
+- Description: Sets the tenant ID for Microsoft OAuth.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `MICROSOFT_OAUTH_SCOPE`
@@ -2427,7 +2553,7 @@ See https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-registe
 
 - Type: `str`
 - Default: `<backend>/oauth/microsoft/callback`
-- Description: Sets the redirect URI for Microsoft OAuth
+- Description: Sets the redirect URI for Microsoft OAuth.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 ### GitHub
@@ -2437,7 +2563,7 @@ See https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-o
 #### `GITHUB_CLIENT_ID`
 
 - Type: `str`
-- Description: Sets the client ID for GitHub OAuth
+- Description: Sets the client ID for GitHub OAuth.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `GITHUB_CLIENT_SECRET`
@@ -2465,13 +2591,13 @@ See https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-o
 #### `OAUTH_CLIENT_ID`
 
 - Type: `str`
-- Description: Sets the client ID for OIDC
+- Description: Sets the client ID for OIDC.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `OAUTH_CLIENT_SECRET`
 
 - Type: `str`
-- Description: Sets the client secret for OIDC
+- Description: Sets the client secret for OIDC.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `OPENID_PROVIDER_URL`
@@ -2664,6 +2790,12 @@ See https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-o
 - Description: Sets the path to the LDAP CA certificate file.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
+#### `LDAP_VALIDATE_CERT`
+
+- Type: `bool`
+- Description: Sets whether to validate the LDAP CA certificate.
+- Persistence: This environment variable is a `PersistentConfig` variable.
+
 #### `LDAP_CIPHERS`
 
 - Type: `str`
@@ -2677,7 +2809,7 @@ See https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-o
 
 #### `USER_PERMISSIONS_CHAT_CONTROLS`
 
-- Type: `str`
+- Type: `bool`
 - Default: `True`
 - Description: Enables or disables user permission to access chat controls.
 - Persistence: This environment variable is a `PersistentConfig` variable.
@@ -2705,14 +2837,14 @@ See https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-o
 
 #### `USER_PERMISSIONS_CHAT_STT`
 
-- Type: `str`
+- Type: `bool`
 - Default: `True`
 - Description: Enables or disables user permission to use Speech-to-Text in chats.
 - Persistence: This environment variable is a `PersistentConfig` variable.
 
 #### `USER_PERMISSIONS_CHAT_TTS`
 
-- Type: `str`
+- Type: `bool`
 - Default: `True`
 - Description: Enables or disables user permission to use Text-to-Speech in chats.
 - Persistence: This environment variable is a `PersistentConfig` variable.
@@ -2893,6 +3025,12 @@ These variables are not specific to Open WebUI but can still be valuable in cert
 - Default: `False`
 - Description: Specifies whether to use the accelerated endpoint for S3 storage.
 
+#### `S3_ENABLE_TAGGING`
+
+- Type: `str`
+- Default: `False`
+- Description: Enables S3 object tagging after uploads for better organization, searching, and integration with file management policies. Always set to `False` when using Cloudflare R2, as R2 does not support object tagging.
+
 #### Google Cloud Storage
 
 #### `GOOGLE_APPLICATION_CREDENTIALS_JSON`
@@ -3016,8 +3154,8 @@ When deploying Open-WebUI in a multi-node/worker cluster, you must ensure that t
 #### `ENABLE_WEBSOCKET_SUPPORT`
 
 - Type: `bool`
-- Default: `False`
-- Description: Enables websocket support in Open WebUI (used with Redis).
+- Default: `True`
+- Description: Enables websocket support in Open WebUI.
 
 :::info
 
